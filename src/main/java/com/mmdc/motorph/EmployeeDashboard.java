@@ -7,6 +7,7 @@ import com.opencsv.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -22,6 +23,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     public EmployeeDashboard() {
         initComponents();
         try {
+            // Get reference to the JTable Model to modify it
             DefaultTableModel model = (DefaultTableModel) employeeTable.getModel();
             model.setRowCount(0);
 
@@ -65,7 +67,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         employeeTable = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
+        searchTextField = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         employeeName = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -98,9 +100,9 @@ public class EmployeeDashboard extends javax.swing.JFrame {
             }
         });
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        searchTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                searchTextFieldActionPerformed(evt);
             }
         });
 
@@ -130,7 +132,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1))
+                        .addComponent(searchTextField))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -157,7 +159,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 393, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -167,12 +169,46 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+         try {
+            // Get reference to the JTable Model to modify it
+            DefaultTableModel model = (DefaultTableModel) employeeTable.getModel();
+            model.setRowCount(0);
+
+            try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/employee_data.csv"))) {
+                 List<String[]> rows = reader.readAll();
+                String[] headers = rows.remove(0);
+                model.setColumnIdentifiers(headers);
+                for (int i = 0; i < headers.length; i++) {
+                    TableColumn column = employeeTable.getColumnModel().getColumn(i);
+                    column.setMinWidth(120);
+                    column.setMaxWidth(120);
+                    column.setPreferredWidth(120);
+                }
+                
+                for (String[] row : rows) {
+                    if(!searchTextField.getText().isEmpty())
+                    {
+                        String keyword = searchTextField.getText();
+                        for(String col: row) {
+                            if(col.toLowerCase().contains(keyword.toLowerCase()))
+                                model.addRow(row);
+                        }
+                        continue;
+                    }
+                    model.addRow(row);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void searchTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTextFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_searchTextFieldActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         new EmployeeDetail(selectedEmployeeId).show();
@@ -230,6 +266,6 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField searchTextField;
     // End of variables declaration//GEN-END:variables
 }
