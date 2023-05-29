@@ -3,58 +3,64 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.mmdc.motorph;
+
 import com.opencsv.*;
+import com.opencsv.exceptions.CsvException;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+
 /**
  *
  * @author redenval
  */
 public class EmployeeDashboard extends javax.swing.JFrame {
+
     String selectedEmployeeId = "";
+    static String employeeDataPath = "src/main/resources/employee_data.csv";
+
     /**
      * Creates new form EmployeeDashboard
      */
     public EmployeeDashboard() {
         initComponents();
+        loadEmployeeData();
+    }
+
+    private void loadEmployeeData() {
         try {
-            // Get reference to the JTable Model to modify it
             DefaultTableModel model = (DefaultTableModel) employeeTable.getModel();
             model.setRowCount(0);
 
-            try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/employee_data.csv"))) {
-                 List<String[]> rows = reader.readAll();
-                String[] headers = rows.remove(0);
-                model.setColumnIdentifiers(headers);
-                for (int i = 0; i < headers.length; i++) {
-                    TableColumn column = employeeTable.getColumnModel().getColumn(i);
-                    column.setMinWidth(120);
-                    column.setMaxWidth(120);
-                    column.setPreferredWidth(120);
-                }
-                
-                for (String[] row : rows) {
-                    model.addRow(row);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            List<String[]> rows = Helper.readCSV(employeeDataPath);
+            String[] headers = rows.remove(0);
+            model.setColumnIdentifiers(headers);
+            for (int i = 0; i < headers.length; i++) {
+                TableColumn column = employeeTable.getColumnModel().getColumn(i);
+                column.setMinWidth(120);
+                column.setMaxWidth(120);
+                column.setPreferredWidth(120);
             }
-        }
-        catch (Exception e) {
+
+            for (String[] row : rows) {
+                model.addRow(row);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        selectedEmployeeId = "";
+        employeeName.setText("");
     }
-    
-      public static void readAllDataAtOnce(String file)
-    {
-        
-    }
-      
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -73,6 +79,8 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
+        editButton = new javax.swing.JButton();
+        deleteButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -109,7 +117,6 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         jButton2.setText("Back");
 
         employeeName.setEditable(false);
-        employeeName.setText("John Doe");
 
         jLabel1.setText("Selected Employee:");
 
@@ -119,6 +126,20 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
+            }
+        });
+
+        editButton.setText("Edit");
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
+
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
             }
         });
 
@@ -133,16 +154,22 @@ public class EmployeeDashboard extends javax.swing.JFrame {
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(searchTextField))
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton2)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(employeeName, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jButton2)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 819, Short.MAX_VALUE))
+                        .addComponent(jButton3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(editButton, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(deleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -155,7 +182,9 @@ public class EmployeeDashboard extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(employeeName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
-                    .addComponent(jButton3))
+                    .addComponent(jButton3)
+                    .addComponent(editButton)
+                    .addComponent(deleteButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -169,39 +198,26 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-         try {
-            // Get reference to the JTable Model to modify it
+        try {
             DefaultTableModel model = (DefaultTableModel) employeeTable.getModel();
             model.setRowCount(0);
 
-            try (CSVReader reader = new CSVReader(new FileReader("src/main/resources/employee_data.csv"))) {
-                 List<String[]> rows = reader.readAll();
-                String[] headers = rows.remove(0);
-                model.setColumnIdentifiers(headers);
-                for (int i = 0; i < headers.length; i++) {
-                    TableColumn column = employeeTable.getColumnModel().getColumn(i);
-                    column.setMinWidth(120);
-                    column.setMaxWidth(120);
-                    column.setPreferredWidth(120);
-                }
-                
-                for (String[] row : rows) {
-                    if(!searchTextField.getText().isEmpty())
-                    {
-                        String keyword = searchTextField.getText();
-                        for(String col: row) {
-                            if(col.toLowerCase().contains(keyword.toLowerCase()))
-                                model.addRow(row);
+            List<String[]> rows = Helper.readCSV(employeeDataPath);
+            String[] headers = rows.remove(0);
+            model.setColumnIdentifiers(headers);
+            for (String[] row : rows) {
+                if (!searchTextField.getText().isEmpty()) {
+                    String keyword = searchTextField.getText();
+                    for (String col : row) {
+                        if (col.toLowerCase().contains(keyword.toLowerCase())) {
+                            model.addRow(row);
                         }
-                        continue;
                     }
-                    model.addRow(row);
+                    continue;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                model.addRow(row);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -221,6 +237,74 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         employeeName.setText(firstName + " " + lastName);
         selectedEmployeeId = employeeTable.getModel().getValueAt(row, 0).toString();
     }//GEN-LAST:event_employeeTableMouseClicked
+
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
+        if(selectedEmployeeId.isEmpty()) return;
+        try {
+            Employee employee = getEmployee();
+            JPanel editEmployeePanel = new EditEmployee(employee);
+            Object[] options = {"Update", "Cancel"};
+            int res = JOptionPane.showOptionDialog(null, editEmployeePanel, "Edit Employee Details", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null);
+            if (res == JOptionPane.YES_OPTION) {
+                Employee newEmployee = ((EditEmployee)editEmployeePanel).getEmployee();
+                List<String[]> employees = Helper.readCSV(employeeDataPath);
+                int index = Helper.findRowIndex(employees, newEmployee.getId());
+                employees.set(index, new String[] {newEmployee.getId(), newEmployee.getLastName(),
+                    newEmployee.getFirstName(), newEmployee.getBirthday(), newEmployee.getAddress(),
+                    newEmployee.getPhoneNumber(), newEmployee.getSss(), newEmployee.getPhilhealth(),
+                    newEmployee.getTin(), newEmployee.getPagibig(), newEmployee.getStatus(), newEmployee.getPosition(),
+                    newEmployee.getImmediateSupervisor(), newEmployee.getBasicSalary(), newEmployee.getRiceSubsidy(),
+                    newEmployee.getPhoneAllowance(), newEmployee.getClothingAllowance(), newEmployee.getGrossSemiMonthlyRate(),
+                    newEmployee.getHourlyRate()});
+                Helper.writeCSV(employees, employeeDataPath);
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        loadEmployeeData();
+    }//GEN-LAST:event_editButtonActionPerformed
+
+    private Employee getEmployee() {
+        int row = employeeTable.getSelectedRow();
+        selectedEmployeeId = employeeTable.getModel().getValueAt(row, 0).toString();
+        String firstName = employeeTable.getModel().getValueAt(row, 2).toString();
+        String lastName = employeeTable.getModel().getValueAt(row, 1).toString();
+        String birthday = employeeTable.getModel().getValueAt(row, 3).toString();
+        String address = employeeTable.getModel().getValueAt(row, 4).toString();
+        String phoneNumber = employeeTable.getModel().getValueAt(row, 5).toString();
+        String sss = employeeTable.getModel().getValueAt(row, 6).toString();
+        String philhealth = employeeTable.getModel().getValueAt(row, 7).toString();
+        String tin = employeeTable.getModel().getValueAt(row, 8).toString();
+        String pagibig = employeeTable.getModel().getValueAt(row, 9).toString();
+        String status = employeeTable.getModel().getValueAt(row, 10).toString();
+        String position = employeeTable.getModel().getValueAt(row, 11).toString();
+        String immediateSupervisor = employeeTable.getModel().getValueAt(row, 12).toString();
+        String basicSalary = employeeTable.getModel().getValueAt(row, 13).toString();
+        String riceSubsidy = employeeTable.getModel().getValueAt(row, 14).toString();
+        String phoneAllowance = employeeTable.getModel().getValueAt(row, 15).toString();
+        String clothingAllowance = employeeTable.getModel().getValueAt(row, 16).toString();
+        String grossSemiMonthlyRate = employeeTable.getModel().getValueAt(row, 17).toString();
+        String hourlyRate = employeeTable.getModel().getValueAt(row, 18).toString();
+        return new Employee(selectedEmployeeId, firstName, lastName, birthday, address, phoneNumber, sss, philhealth, tin, pagibig, status, position, immediateSupervisor, basicSalary, riceSubsidy, phoneAllowance, clothingAllowance, grossSemiMonthlyRate, hourlyRate);
+    }
+
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        if(selectedEmployeeId.isEmpty()) return;
+        int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this record?", "Delete Record", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if(result == JOptionPane.YES_OPTION) {
+            try {
+                List<String[]> employees = Helper.readCSV(employeeDataPath);
+                int index = Helper.findRowIndex(employees, selectedEmployeeId);
+                employees.remove(index);
+                Helper.writeCSV(employees, employeeDataPath);
+            } catch (IOException ex) {
+                Logger.getLogger(EmployeeDashboard.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (CsvException ex) {
+                Logger.getLogger(EmployeeDashboard.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        loadEmployeeData();
+    }//GEN-LAST:event_deleteButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -258,6 +342,8 @@ public class EmployeeDashboard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton deleteButton;
+    private javax.swing.JButton editButton;
     private javax.swing.JTextField employeeName;
     private javax.swing.JTable employeeTable;
     private javax.swing.JButton jButton1;
