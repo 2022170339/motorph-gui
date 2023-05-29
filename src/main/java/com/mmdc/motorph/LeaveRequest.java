@@ -30,6 +30,10 @@ public class LeaveRequest extends javax.swing.JFrame {
     public LeaveRequest() {
         initComponents();
         calculateLeave();
+        loadTableData();
+    }
+    
+    private void loadTableData() {
         try {
             DefaultTableModel model = (DefaultTableModel) leaveTable.getModel();
             model.setRowCount(0);
@@ -222,6 +226,10 @@ public class LeaveRequest extends javax.swing.JFrame {
     }//GEN-LAST:event_typeActionPerformed
 
     private void submitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitActionPerformed
+        if(date.getText().isEmpty()) {
+            JOptionPane.showConfirmDialog(null, "Fill out missing fields!", "Leave Request", JOptionPane.DEFAULT_OPTION);
+            return;
+        }
         try {
             String typeOfLeave = String.valueOf(type.getSelectedItem());
             int count = 0;
