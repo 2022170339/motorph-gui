@@ -4,17 +4,26 @@
  */
 package com.mmdc.motorph;
 
+import com.opencsv.exceptions.CsvException;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author redenval
  */
 public class Login extends javax.swing.JFrame {
-
+    static String ACCOUNTPATH = "src/main/resources/account.csv";
+    static String EMPLOYEEPATH = "src/main/resources/employee_data.csv";
     /**
      * Creates new form Login
      */
     public Login() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -26,20 +35,26 @@ public class Login extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTextField1 = new javax.swing.JTextField();
+        accountNumber = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jPasswordField1 = new javax.swing.JPasswordField();
+        password = new javax.swing.JPasswordField();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Login");
+        setLocationByPlatform(true);
 
         jLabel1.setText("Account Number:");
 
         jLabel2.setText("Password:");
 
         jButton1.setText("Login");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -55,8 +70,8 @@ public class Login extends javax.swing.JFrame {
                             .addComponent(jLabel2))
                         .addGap(37, 37, 37)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextField1)
-                            .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(accountNumber)
+                            .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(43, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -64,12 +79,12 @@ public class Login extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accountNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jButton1)
                 .addContainerGap(21, Short.MAX_VALUE))
@@ -77,6 +92,52 @@ public class Login extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        String pass = new String(password.getPassword());
+        if(accountNumber.getText().isEmpty() || pass.isEmpty())
+        {
+            JOptionPane.showConfirmDialog(null, "Please fill up missing fields, try again!", "Missing Fields", JOptionPane.DEFAULT_OPTION);
+            return;
+        }
+        
+        try {
+            List<String[]> employees = Helper.readCSV(EMPLOYEEPATH);
+            List<String[]> accounts = Helper.readCSV(ACCOUNTPATH);
+            int ei = Helper.findRowIndex(employees, accountNumber.getText().trim());
+            int ai = Helper.findRowIndex(accounts, accountNumber.getText().trim());
+            if(ei > 0) {
+                if(ai > 0)
+                {
+                    String[] account = accounts.get(ai);
+                    if(Helper.isPasswordCorrect(password.getPassword(), account[1].toCharArray())) {
+                        Helper.currentLoggedIn = accountNumber.getText().trim();
+                        this.dispose();
+                        new EmployeeMain().setVisible(true);
+                    } else {
+                        JOptionPane.showConfirmDialog(null, "Incorrect credentials, try again!", "Incorrect Credentials", JOptionPane.DEFAULT_OPTION);
+                    }
+                } else {
+                        int result = JOptionPane.showConfirmDialog(null, "Account not activated, activate your account with the given password?", "Account Creation", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+                        if (result == JOptionPane.YES_OPTION) {
+                            accounts.add(new String[] { accountNumber.getText(), pass});
+                            Helper.writeCSV(accounts, ACCOUNTPATH);
+                            Helper.currentLoggedIn = accountNumber.getText().trim();
+                            this.dispose();
+                            new EmployeeMain().setVisible(true);
+                        }
+                }
+            } else {
+                JOptionPane.showConfirmDialog(null, "Account doesn't exists! Please contact your manager.", "Account Not Exist", JOptionPane.DEFAULT_OPTION);
+            }
+            accountNumber.setText("");
+            password.setText("");
+        } catch (IOException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CsvException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -114,10 +175,10 @@ public class Login extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField accountNumber;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JPasswordField password;
     // End of variables declaration//GEN-END:variables
 }

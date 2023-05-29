@@ -33,6 +33,7 @@ public class EmployeeDashboard extends javax.swing.JFrame {
      */
     public EmployeeDashboard() {
         initComponents();
+        setLocationRelativeTo(null);
         loadEmployeeData();
     }
 
@@ -115,6 +116,11 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         });
 
         jButton2.setText("Back");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         employeeName.setEditable(false);
 
@@ -305,6 +311,11 @@ public class EmployeeDashboard extends javax.swing.JFrame {
         }
         loadEmployeeData();
     }//GEN-LAST:event_deleteButtonActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        this.dispose();
+        new EmployeeMain().setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments

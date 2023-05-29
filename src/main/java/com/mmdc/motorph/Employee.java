@@ -52,6 +52,30 @@ public class Employee {
         this.grossSemiMonthlyRate = grossSemiMonthlyRate;
         this.hourlyRate = hourlyRate;
     }
+    
+    public Employee(String[] data) {    
+        if(data.length != 19) return;
+        
+        this.id = data[0];
+        this.firstName = data[1];
+        this.lastName = data[2];
+        this.birthday = data[3];
+        this.address = data[4];
+        this.phoneNumber = data[5];
+        this.sss = data[6];
+        this.philhealth = data[7];
+        this.tin = data[8];
+        this.pagibig = data[9];
+        this.status = data[10];
+        this.position = data[11];
+        this.immediateSupervisor = data[12];
+        this.basicSalary = data[13];
+        this.riceSubsidy = data[14];
+        this.phoneAllowance = data[15];
+        this.clothingAllowance = data[16];
+        this.grossSemiMonthlyRate = data[17];
+        this.hourlyRate = data[18];
+    }
 
     public String getId() {
         return id;

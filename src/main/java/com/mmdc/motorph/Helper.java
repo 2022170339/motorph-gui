@@ -10,6 +10,7 @@ import com.opencsv.exceptions.CsvException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ import java.util.List;
  * @author redenval
  */
 public class Helper {
+    public static String currentLoggedIn = "";
     public static int findRowIndex(List<String[]> rows, String id) {
         for (int i = 0; i < rows.size(); i++) {
             String[] row = rows.get(i);
@@ -26,7 +28,7 @@ public class Helper {
         }
         return -1; // Row not found
     }
-    
+
     public static List<String[]> readCSV(String filePath) throws IOException, CsvException {
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             return reader.readAll();
@@ -37,5 +39,17 @@ public class Helper {
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
             writer.writeAll(rows);
         }
+    }
+
+    public static boolean isPasswordCorrect(char[] input, char[] password) {
+        boolean isCorrect = true;
+
+        if (input.length != password.length) {
+            isCorrect = false;
+        } else {
+            isCorrect = Arrays.equals(input, password);
+        }
+
+        return isCorrect;
     }
 }
