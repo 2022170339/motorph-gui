@@ -18,7 +18,9 @@ import java.util.List;
  * @author redenval
  */
 public class Helper {
+
     public static String currentLoggedIn = "";
+
     public static int findRowIndex(List<String[]> rows, String id) {
         for (int i = 0; i < rows.size(); i++) {
             String[] row = rows.get(i);
@@ -42,14 +44,15 @@ public class Helper {
     }
 
     public static boolean isPasswordCorrect(char[] input, char[] password) {
-        boolean isCorrect = true;
-
         if (input.length != password.length) {
-            isCorrect = false;
-        } else {
-            isCorrect = Arrays.equals(input, password);
+            return false; // If the lengths are different, the passwords can't be equal
         }
-
-        return isCorrect;
+        // Compare each character in the input and password arrays
+        for (int i = 0; i < input.length; i++) {
+            if (input[i] != password[i]) {
+                return false; // If any characters are different, the passwords are not equal
+            }
+        }
+        return true; // If all characters are the same, the passwords are equal
     }
 }
